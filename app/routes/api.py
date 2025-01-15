@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, session
 from app.models import User, Post, Comment, Vote
 from app.db import get_db
 import sys
+from app.utils.auth import login_required
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -65,6 +66,7 @@ def login():
 
 
 @bp.route('/comments', methods=['POST'])
+@login_required
 def comment():
     data = request.get_json()
     db = get_db()
@@ -89,6 +91,7 @@ def comment():
 
 
 @bp.route('/posts/upvote', methods=['PUT'])
+@login_required
 def upvote():
     data = request.get_json()
     db = get_db()
@@ -112,30 +115,32 @@ def upvote():
 
 
 @bp.route('/posts', methods=['POST'])
+@login_required
 def create():
-    data = request.get_json()
-    db = get_db()
+  data = request.get_json()
+  db = get_db()
 
-    try:
-        # create new post
-        newPost = Post(
-            title = data['title'],
-            post_url = data['post_url'],
-            user_id = session.get('user_id')
-        )
+  try:
+    # create a new post
+    newPost = Post(
+      title = data['title'],
+      post_url = data['post_url'],
+      user_id = session.get('user_id')
+    )
 
-        db.add(newPost)
-        db.commit()
-    except:
-        print(sys.exc_info()[0])
+    db.add(newPost)
+    db.commit()
+  except:
+    print(sys.exc_info()[0])
 
-        db.rollback()
-        return jsonify(message = 'Post failed'), 500
-    
-    return jsonify(id = newPost.id)
+    db.rollback()
+    return jsonify(message = 'Post failed'), 500
+
+  return jsonify(id = newPost.id)
 
 
 @bp.route('/posts/<id>', methods=['PUT'])
+@login_required
 def update(id):
     data = request.get_json()
     db = get_db()
@@ -154,6 +159,7 @@ def update(id):
 
 
 @bp.route('/posts/<id>', methods=['DELETE'])
+@login_required
 def delete(id):
     db = get_db()
 
