@@ -1,3 +1,6 @@
+import pymysql
+pymysql.install_as_MySQLdb()
+
 from os import getenv
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import create_engine
