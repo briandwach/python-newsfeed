@@ -11,18 +11,24 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Fetch the CA certificate from the environment variable
 ssl_args = {
-    'ca': getenv('DB_SSL_CA_PATH')
+    'ssl_ca': getenv('DB_SSL_CA')  # Fetch the certificate from environment variable
 }
 
-# connect to database using env variable
-engine = create_engine(getenv('DB_URL'), echo=True, pool_size=20, max_overflow=0, connect_args={'ssl': ssl_args})
+# Connect to the database using the environment variable for the URL
+engine = create_engine(
+    getenv('DB_URL'),
+    echo=True,
+    pool_size=20,
+    max_overflow=0,
+    connect_args={'ssl': ssl_args}
+)
 Session = sessionmaker(bind=engine)
 Base = declarative_base()
 
 def init_db(app):
     Base.metadata.create_all(engine)
-
     app.teardown_appcontext(close_db)
 
 def get_db():
